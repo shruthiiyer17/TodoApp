@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { FlatList, ActivityIndicator, Text, View, StyleSheet, TouchableOpacity, Pressable, Button, Platform, PermissionsAndroid } from 'react-native';
+import { FlatList, ActivityIndicator, Text, View, StyleSheet, TouchableOpacity, Pressable, Button } from 'react-native';
 import { useTodos } from '../hooks/useTodos';
 import TodoItem from '../components/TodoItem';
 import { Todo } from '../types/todos';
@@ -9,7 +9,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { showMessage } from 'react-native-flash-message';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { resetTodoSystem } from '../api/todoService';
-import PushNotification from 'react-native-push-notification';
 type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
 
 interface Props {
@@ -31,6 +30,7 @@ const HomeScreen = ({ navigation }: Props) => {
   const [dueDates, setDueDates] = useState<Record<number, string>>({});
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [hideCompleted, setHideCompleted] = useState(false);
+  const [sortByDueDate, setSortByDueDate] = useState<'asc' | 'desc' | null>(null);
 
   // Load preferences
   useEffect(() => {
@@ -227,6 +227,25 @@ const handleDelete = async (id: number) => {
     );
   }
 
+   const getSortedTodos = () => {
+    if (!sortByDueDate) return filteredTodos;
+    
+    return [...filteredTodos].sort((a, b) => {
+      const dateA = a.dueDate ? new Date(a.dueDate).getTime() : Number.MAX_SAFE_INTEGER;
+      const dateB = b.dueDate ? new Date(b.dueDate).getTime() : Number.MAX_SAFE_INTEGER;
+      
+      return sortByDueDate === 'asc' ? dateA - dateB : dateB - dateA;
+    });
+  };
+
+  const toggleSortByDueDate = () => {
+    setSortByDueDate(prev => {
+      if (prev === null) return 'asc';
+      if (prev === 'asc') return 'desc';
+      return null;
+    });
+  };
+
   return (
     <View style={styles.container}>
       {/* Updated Header */}
@@ -244,46 +263,20 @@ const handleDelete = async (id: number) => {
             {hideCompleted ? 'Show Completed' : 'Hide Completed'}
           </Text>
         </TouchableOpacity>
-        <Button
-          title="Deep Test Notification"
-          onPress={async () => {
-            console.log('Attempting to show notification...');
-            
-            // 1. Verify channel exists
-            PushNotification.getChannels(channels => {
-              console.log('Existing channels:', channels);
-            });
-
-            // 2. Check permissions
-            if (Platform.OS === 'android') {
-              const status = await PermissionsAndroid.request(
-                PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
-              );
-              console.log('Permission status:', status);
-            }
-
-            // 3. Try different notification types
-            try {
-              // Immediate notification
-              PushNotification.localNotification({
-                channelId: "todo_reminders",
-                id: 'TEST_123', // Required for Android
-                title: "URGENT TEST",
-                message: "You should definitely see this",
-                playSound: true,
-                soundName: 'default',
-                vibrate: true,
-                vibration: 1000,
-                importance: 'high', // Android only
-                priority: 'high', // Android only
-              });
-
-              console.log('Notification should be visible now');
-            } catch (error) {
-              console.error('Notification error:', error);
-            }
-          }}
-        />
+         <TouchableOpacity 
+          style={styles.sortButton}
+          onPress={toggleSortByDueDate}
+        >
+          <Icon 
+            name={sortByDueDate === 'asc' ? 'arrow-upward' : 
+                  sortByDueDate === 'desc' ? 'arrow-downward' : 'sort'}
+            size={24} 
+            color="#3498db" 
+          />
+          <Text style={styles.sortButtonText}>
+            {sortByDueDate ? 'Due Date' : 'Sort'}
+          </Text>
+        </TouchableOpacity>
       </View>
 
       {/* Stats Row */}
@@ -303,7 +296,7 @@ const handleDelete = async (id: number) => {
       </View>
 
       <FlatList
-        data={filteredTodos}
+        data={getSortedTodos()}
         keyExtractor={(item) => `${item.id}`}
         renderItem={({ item }) => (
           <TodoItem 
@@ -490,6 +483,16 @@ const styles = StyleSheet.create({
   resetButtonText: {
     color: '#FF0000',
     marginLeft: 5,
+  },
+    sortButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    padding: 8,
+  },
+  sortButtonText: {
+    color: '#3498db',
+    fontWeight: '500',
   },
 });
 

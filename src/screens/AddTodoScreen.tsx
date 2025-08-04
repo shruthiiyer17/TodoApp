@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, TextInput, Button, StyleSheet, Text, ActivityIndicator } from 'react-native';
+import { View, TextInput, Button, StyleSheet, Text, ActivityIndicator, Pressable } from 'react-native';
 import { RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types/navigation';
@@ -104,14 +104,27 @@ const AddTodoScreen = ({ route, navigation }: Props) => {
         />
         
         {isSaving ? (
-          <ActivityIndicator size="small" color="#2ECC71" />
+          <ActivityIndicator size="small" color="#df2fd4ff" />
         ) : (
-          <Button 
-            title="Save" 
-            onPress={handleSave} 
+          // <Button 
+          //   title="Save" 
+          //   onPress={handleSave} 
+          //   disabled={!text.trim()}
+          //   color="#2ecc1d"
+          // />
+          <Pressable
+            onPress={handleSave}
             disabled={!text.trim()}
-            color="#2ECC71"
-          />
+            style={({ pressed }) => [
+              styles.saveButton,
+              {
+                opacity: pressed ? 0.7 : 1,
+                backgroundColor: !text.trim() ? '#95a5a6' : '#2ecc71',
+              }
+            ]}
+          >
+            <Text style={styles.saveButtonText}>Save</Text>
+          </Pressable>
         )}
       </View>
     </View>
@@ -153,6 +166,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 20,
+  },
+    saveButton: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 5,
+    alignItems: 'center',
+  },
+  saveButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
   },
 });
 
