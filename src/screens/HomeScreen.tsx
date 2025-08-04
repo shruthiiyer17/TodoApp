@@ -43,7 +43,7 @@ const HomeScreen = ({ navigation }: Props) => {
         
         const dueDatesMap = storedDueDates.reduce((acc, [key, value]) => {
           if (value) {
-            const todoId = parseInt(key.replace('dueDate_', ''));
+            const todoId = parseInt(key.replace('dueDate_', ''), 10);
             acc[todoId] = value;
           }
           return acc;

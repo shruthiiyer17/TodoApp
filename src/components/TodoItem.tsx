@@ -24,7 +24,7 @@ const TodoItem = ({ todo, onToggleCompletion, onDelete, onEdit }: Props) => {
       <View style={styles.textContainer}>
         <Text 
           style={[styles.title, todo.completed && styles.completedTitle]}
-          numberOfLines={1}
+          // numberOfLines={1}
           ellipsizeMode="tail"
         >
           {todo.todo}
