@@ -1,6 +1,6 @@
 // src/notifications.js
 import PushNotification from 'react-native-push-notification';
-import { Platform, PushNotificationIOS, PermissionsAndroid } from 'react-native';
+import { Platform, PermissionsAndroid } from 'react-native';
 
 
 // Initialize with error handling
@@ -83,7 +83,7 @@ export const scheduleDueDateNotification = (taskTitle, dueDate, todoId) => {
 // Helper to cancel notifications
 export const cancelNotification = (todoId) => {
   if (!todoId) return;
-  PushNotification.cancelLocalNotifications({ id: todoId.toString() });
+  PushNotification.cancelLocalNotification({ id: todoId.toString() });
   console.log(`Cancelled notification for todo ${todoId}`);
 };
 

@@ -37,7 +37,7 @@ const EditTodoScreen = ({ route, navigation }: Props) => {
       await onSave(updatedTodo);
 
       // Cancel any existing notification for this todo
-      PushNotification.cancelLocalNotifications({ id: todo.id.toString() });
+      PushNotification.cancelLocalNotification(todo.id.toString());
 
       // Reschedule if due date exists
       if (date) {
